@@ -23,19 +23,3 @@ spec:
         ports:
         - containerPort: 80
 ...
-# service -nodePort
-apiVersion: v1
-kind: Service
-metadata:
-  name: javaspringsvc
-
-spec:
-  selector:
-    appname: javaspringboot
-    version: green            # ------> Label of Pod
-  type: NodePort
-  ports:
-  - port: 80                  #------> service port
-    targetPort: 8080           #------> container port
-    nodePort: 32000
-...

@@ -1,0 +1,40 @@
+# Deployment Set
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mkmwebapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      appname: springboot
+      version: green
+  template:
+    metadata:
+      name: springbootpod
+      labels:
+        appname: springboot
+        version: green
+    spec:
+      containers:
+      - name: springbootcontainer
+        image: modugulakrishna99/springdockermkm:1.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+
+...
+# service -nodePort
+apiVersion: v1
+kind: Service
+metadata:
+  name: javaspringsvc
+spec:
+  selector:
+    appname: springboot
+    version: green            # ------> Label of Pod
+  type: NodePort
+  ports:
+  - port: 80                  #------> service port
+    targetPort: 8080           #------> container port
+    nodePort: 32000

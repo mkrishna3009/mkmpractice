@@ -1,0 +1,90 @@
+# service -nodePort
+apiVersion: v1
+kind: Service
+metadata:
+  name: springdockermkm
+
+spec:
+  selector:
+    appname: springboot            # ------> Label of Pod
+  type: NodePort
+  ports:
+  - port: 80                  #------> service port
+    targetPort: 8080           #------> container port
+    nodePort: 31000
+...
+---
+# Deployment Set
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: java-springboot-deployment
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 30
+  selector:
+    matchLabels:
+      appname: springboot
+  template:
+    metadata:
+      name: javaspringbootpod
+      labels:
+        appname: springboot
+    spec:
+      containers:
+      - name: javaspringbootcontainer
+        image: modugulakrishna99/springdockermkm:1.0
+        ports:
+        - containerPort: 80
+...
+---
+# Mongo host path rc
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  labels:
+    name: mongo
+  name: mongo-controller
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: mongo
+    spec:
+      containers:
+      - image: mongo
+        name: mongo
+        ports:
+        - name: mongo
+          containerPort: 27017
+          hostPort: 27017
+        volumeMounts:
+        - name: mongo-persistent-storage
+          mountPath: /data/db
+      volumes:
+      - name: mongo-persistent-storage
+        hostPath:
+         path: /tmp/dbbackup
+...
+---
+# Mongo Node Port RC
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: mongo
+  name: mongo
+spec:
+  type: ClusterIP
+  ports:
+    - port: 27017
+      targetPort: 27017
+  selector:
+    name: mongo
+...	
